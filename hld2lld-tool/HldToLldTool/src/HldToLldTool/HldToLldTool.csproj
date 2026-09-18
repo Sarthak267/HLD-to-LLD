@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>HldToLldTool</RootNamespace>
+    <AssemblyName>hld2lld</AssemblyName>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <!--
+    Intentionally zero external NuGet dependencies:
+    - HttpClient        -> System.Net.Http (in-box)
+    - JSON parsing       -> System.Text.Json (in-box)
+    - Deflate for PlantUML encoding -> System.IO.Compression (in-box)
+    This means "dotnet build" works offline / behind restrictive proxies.
+  -->
+
+</Project>

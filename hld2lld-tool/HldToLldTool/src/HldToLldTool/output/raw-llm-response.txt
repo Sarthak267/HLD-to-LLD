@@ -1,0 +1,405 @@
+{
+  "title": "Low-Level Design: Online Food Ordering Platform",
+  "overview": "Detailed design of the Online Food Ordering Platform, expanding on the High-Level Design (HLD) provided.",
+  "markdownBody": "# Low-Level Design: Online Food Ordering Platform
+
+## Overview
+The Online Food Ordering Platform is a complex system with multiple components and services. This Low-Level Design (LLD) document provides a detailed breakdown of each component, including their responsibilities, public interfaces, internal classes, data model, and key algorithms.
+
+## Component Breakdown
+
+### Customer Web/Mobile App
+#### Responsibilities
+- Handle customer browsing and cart management
+- Integrate with Payment Service for online payments
+- Display order tracking information
+
+#### Public Interfaces
+- REST API for browsing and cart management
+- Websocket for real-time order tracking updates
+
+#### Internal Classes
+- `CartManager` class for managing customer cart
+- `OrderTracker` class for displaying order tracking information
+
+#### Data Model
+- `Customer` entity with fields `id`, `name`, `email`
+- `Order` entity with fields `id`, `customer_id`, `status`, `delivery_address`
+
+#### Key Algorithms
+- None
+
+#### Error Handling & Retries
+- Implement retry mechanism for failed payments
+- Handle errors in order tracking updates
+
+#### Configuration
+- Configure Payment Service credentials
+- Configure Websocket connection for order tracking updates
+
+### Restaurant Partner Dashboard
+#### Responsibilities
+- Manage restaurant menu and incoming orders
+- Accept or reject orders from the Order Service
+
+#### Public Interfaces
+- REST API for menu management and order acceptance
+- Websocket for real-time order updates
+
+#### Internal Classes
+- `MenuManager` class for managing restaurant menu
+- `OrderAcceptance` class for accepting or rejecting orders
+
+#### Data Model
+- `Restaurant` entity with fields `id`, `name`, `menu`
+- `Order` entity with fields `id`, `restaurant_id`, `status`
+
+#### Key Algorithms
+- None
+
+#### Error Handling & Retries
+- Implement retry mechanism for failed order updates
+- Handle errors in order acceptance
+
+#### Configuration
+- Configure Order Service credentials
+- Configure Websocket connection for order updates
+
+### Delivery Partner App
+#### Responsibilities
+- Pick up and deliver orders
+- Send live location updates to the Order Service
+
+#### Public Interfaces
+- REST API for order pickup and delivery
+- Websocket for live location updates
+
+#### Internal Classes
+- `OrderPicker` class for picking up orders
+- `LocationUpdater` class for sending live location updates
+
+#### Data Model
+- `DeliveryPartner` entity with fields `id`, `name`, `location`
+- `Order` entity with fields `id`, `delivery_partner_id`, `status`
+
+#### Key Algorithms
+- None
+
+#### Error Handling & Retries
+- Implement retry mechanism for failed order updates
+- Handle errors in live location updates
+
+#### Configuration
+- Configure Order Service credentials
+- Configure Websocket connection for live location updates
+
+### Order Service
+#### Responsibilities
+- Own the order lifecycle (created, confirmed, preparing, out for delivery, delivered, cancelled)
+- Request payment authorization from the Payment Service
+
+#### Public Interfaces
+- REST API for order creation and confirmation
+- Event bus for order status updates
+
+#### Internal Classes
+- `OrderManager` class for managing order lifecycle
+- `PaymentRequester` class for requesting payment authorization
+
+#### Data Model
+- `Order` entity with fields `id`, `customer_id`, `status`, `delivery_address`
+
+#### Key Algorithms
+- None
+
+#### Error Handling & Retries
+- Implement retry mechanism for failed payment authorization
+- Handle errors in order status updates
+
+#### Configuration
+- Configure Payment Service credentials
+- Configure event bus connection for order status updates
+
+### Payment Service
+#### Responsibilities
+- Integrate with a third-party payment gateway
+- Handle refunds
+
+#### Public Interfaces
+- REST API for payment authorization and refunds
+
+#### Internal Classes
+- `PaymentGateway` class for integrating with payment gateway
+- `RefundHandler` class for handling refunds
+
+#### Data Model
+- `Payment` entity with fields `id`, `order_id`, `status`
+
+#### Key Algorithms
+- None
+
+#### Error Handling & Retries
+- Implement retry mechanism for failed payment authorization
+- Handle errors in refunds
+
+#### Configuration
+- Configure payment gateway credentials
+- Configure event bus connection for payment updates
+
+### Notification Service
+#### Responsibilities
+- Send push/SMS/email notifications to customers, restaurants, and delivery partners
+
+#### Public Interfaces
+- REST API for notification sending
+
+#### Internal Classes
+- `NotificationSender` class for sending notifications
+
+#### Data Model
+- `Notification` entity with fields `id`, `recipient`, `message`
+
+#### Key Algorithms
+- None
+
+#### Error Handling & Retries
+- Implement retry mechanism for failed notification sending
+- Handle errors in notification updates
+
+#### Configuration
+- Configure notification sending credentials
+- Configure event bus connection for notification updates
+
+### Search & Catalog Service
+#### Responsibilities
+- Provide restaurant and menu search/filtering
+
+#### Public Interfaces
+- REST API for search and filtering
+
+#### Internal Classes
+- `SearchEngine` class for searching restaurants and menus
+- `FilteringEngine` class for filtering search results
+
+#### Data Model
+- `Restaurant` entity with fields `id`, `name`, `menu`
+- `Menu` entity with fields `id`, `restaurant_id`, `items`
+
+#### Key Algorithms
+- None
+
+#### Error Handling & Retries
+- Implement retry mechanism for failed search and filtering
+- Handle errors in search and filtering updates
+
+#### Configuration
+- Configure search and filtering credentials
+- Configure event bus connection for search and filtering updates
+
+### Delivery Matching Service
+#### Responsibilities
+- Assign the nearest available delivery partner to a confirmed order
+
+#### Public Interfaces
+- REST API for delivery partner assignment
+
+#### Internal Classes
+- `DeliveryMatcher` class for matching delivery partners
+- `AssignmentEngine` class for assigning delivery partners
+
+#### Data Model
+- `DeliveryPartner` entity with fields `id`, `name`, `location`
+- `Order` entity with fields `id`, `customer_id`, `status`
+
+#### Key Algorithms
+- None
+
+#### Error Handling & Retries
+- Implement retry mechanism for failed delivery partner assignment
+- Handle errors in delivery partner assignment
+
+#### Configuration
+- Configure delivery partner credentials
+- Configure event bus connection for delivery partner updates
+
+## Data Model
+### Order
+| Field | Type | Description |
+| --- | --- | --- |
+| id | int | Unique order ID |
+| customer_id | int | Foreign key referencing the Customer entity |
+| status | string | Order status (created, confirmed, preparing, out for delivery, delivered, cancelled) |
+| delivery_address | string | Delivery address |
+
+### Customer
+| Field | Type | Description |
+| --- | --- | --- |
+| id | int | Unique customer ID |
+| name | string | Customer name |
+| email | string | Customer email |
+
+### Restaurant
+| Field | Type | Description |
+| --- | --- | --- |
+| id | int | Unique restaurant ID |
+| name | string | Restaurant name |
+| menu | array | Menu items |
+
+### Menu
+| Field | Type | Description |
+| --- | --- | --- |
+| id | int | Unique menu item ID |
+| restaurant_id | int | Foreign key referencing the Restaurant entity |
+| items | array | Menu items |
+
+## Key Sequence Flows
+
+### Customer Places Order
+1. Customer searches restaurants and adds items to cart
+2. Customer checks out and payment is authorized
+3. Order Service creates the order and requests payment authorization
+4. Payment Service authorizes payment and notifies Order Service
+5. Order Service confirms the order and sends it to the restaurant
+6. Restaurant accepts the order and starts preparing
+7. Delivery Matching Service assigns a delivery partner
+8. Delivery partner picks up the order and delivers it
+
+### Restaurant Accepts Order
+1. Restaurant receives order from Order Service
+2. Restaurant accepts or rejects the order
+3. Order Service updates the order status
+4. Delivery Matching Service assigns a delivery partner
+5. Delivery partner picks up the order and delivers it
+
+### Delivery Partner Delivers Order
+1. Delivery partner receives assignment from Delivery Matching Service
+2. Delivery partner picks up the order and delivers it
+3. Delivery partner sends live location updates to the Order Service
+4. Order Service updates the order status
+
+## Deployment / Infra Topology
+The platform will be deployed on AWS, using a microservices architecture with REST APIs and an event bus for async updates. The following technologies will be used:
+
+* Containerization: Docker
+* Orchestration: Kubernetes
+* Service Discovery: etcd
+* Event Bus: Apache Kafka
+* Database: Amazon Aurora
+* Message Queue: Amazon SQS
+* Payment Gateway: Stripe
+* Notification Service: Twilio
+
+## Diagrams
+
+### Component Diagram
+```plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+!include <awslib/AWSCommon>
+!include <awslib/Compute/all>
+!include <awslib/Database/all>
+!include <awslib/NetworkingContentDelivery/all>
+!include <kubernetes/k8s_sprites_unlabeled_25pct>
+
+Container(customer-web-mobile-app, "Customer Web/Mobile App", "ASP.NET Core", $sprite="awslib/Compute/AmazonEC2")
+Container(restaurant-partner-dashboard, "Restaurant Partner Dashboard", "ASP.NET Core", $sprite="awslib/Compute/AmazonEC2")
+Container(delivery-partner-app, "Delivery Partner App", "ASP.NET Core", $sprite="awslib/Compute/AmazonEC2")
+Container(order-service, "Order Service", "ASP.NET Core", $sprite="awslib/Compute/AmazonEC2")
+Container(payment-service, "Payment Service", "ASP.NET Core", $sprite="awslib/Compute/AmazonEC2")
+Container(notification-service, "Notification Service", "ASP.NET Core", $sprite="awslib/Compute/AmazonEC2")
+Container(search-and-catalog-service, "Search & Catalog Service", "ASP.NET Core", $sprite="awslib/Compute/AmazonEC2")
+Container(delivery-matching-service, "Delivery Matching Service", "ASP.NET Core", $sprite="awslib/Compute/AmazonEC2")
+
+System_Boundary(customer-web-mobile-app) {
+  Container(customer-web-mobile-app)
+}
+
+System_Boundary(restaurant-partner-dashboard) {
+  Container(restaurant-partner-dashboard)
+}
+
+System_Boundary(delivery-partner-app) {
+  Container(delivery-partner-app)
+}
+
+System_Boundary(order-service) {
+  Container(order-service)
+}
+
+System_Boundary(payment-service) {
+  Container(payment-service)
+}
+
+System_Boundary(notification-service) {
+  Container(notification-service)
+}
+
+System_Boundary(search-and-catalog-service) {
+  Container(search-and-catalog-service)
+}
+
+System_Boundary(delivery-matching-service) {
+  Container(delivery-matching-service)
+}
+
+Deployment_Node(aws-ec2, "AWS EC2", $sprite="awslib/Compute/AmazonEC2")
+Deployment_Node(aws-rds, "AWS RDS", $sprite="awslib/Database/AmazonRDS")
+Deployment_Node(aws-sqs, "AWS SQS", $sprite="awslib/NetworkingContentDelivery/AmazonSQS")
+
+Container(order-service) --|> aws-ec2
+Container(payment-service) --|> aws-ec2
+Container(notification-service) --|> aws-ec2
+Container(search-and-catalog-service) --|> aws-ec2
+Container(delivery-matching-service) --|> aws-ec2
+
+aws-ec2 --|> aws-rds
+aws-ec2 --|> aws-sqs
+
+@enduml
+```
+
+### Deployment Diagram
+```plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+!include <awslib/AWSCommon>
+!include <awslib/Compute/all>
+!include <awslib/Database/all>
+!include <awslib/NetworkingContentDelivery/all>
+
+Deployment_Node(aws-ec2, "AWS EC2", $sprite="awslib/Compute/AmazonEC2")
+Deployment_Node(aws-rds, "AWS RDS", $sprite="awslib/Database/AmazonRDS")
+Deployment_Node(aws-sqs, "AWS SQS", $sprite="awslib/NetworkingContentDelivery/AmazonSQS")
+
+aws-ec2 --|> aws-rds
+aws-ec2 --|> aws-sqs
+
+@enduml
+```
+
+### Sequence Diagram
+```plantuml
+@startuml
+participant Customer Web/Mobile App
+participant Order Service
+participant Payment Service
+participant Notification Service
+participant Search & Catalog Service
+participant Delivery Matching Service
+participant Delivery Partner App
+
+Customer Web/Mobile App ->> Order Service: Create Order
+Order Service ->> Payment Service: Request Payment Authorization
+Payment Service ->> Order Service: Payment Authorized
+Order Service ->> Search & Catalog Service: Get Restaurant and Menu Information
+Search & Catalog Service ->> Order Service: Return Restaurant and Menu Information
+Order Service ->> Delivery Matching Service: Assign Delivery Partner
+Delivery Matching Service ->> Order Service: Return Delivery Partner Information
+Order Service ->> Delivery Partner App: Update Order Status
+Delivery Partner App ->> Order Service: Return Order Status Update
+
+@enduml
+```
+```
+```
